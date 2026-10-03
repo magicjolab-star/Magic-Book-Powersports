@@ -1,5 +1,5 @@
-const CACHE_NAME = 'magic-book-powersports-v460';
-const APP_SHELL = ['/', '/index-360.html?v=460', '/style-330.css?v=460', '/style-352.css?v=460', '/style-360.css?v=460', '/accessory-350.css?v=460', '/data-330.js?v=460', '/app-330.js?v=460', '/accessory-350.js?v=460', '/auth-352.js?v=460', '/premium-360.js?v=460', '/flow-361.js?v=460', '/flow-core-361.js?v=460', '/auth-otp-guard.js?v=460', '/optional-access-365.js?v=460', '/manifest.webmanifest?v=460'];
+const CACHE_NAME = 'magic-book-powersports-v600';
+const APP_SHELL = ['/', '/index-360.html?v=600', '/style-330.css?v=600', '/style-352.css?v=600', '/style-360.css?v=600', '/accessory-350.css?v=600', '/data-330.js?v=600', '/app-330.js?v=600', '/accessory-350.js?v=600', '/auth-352.js?v=600', '/premium-360.js?v=600', '/flow-361.js?v=600', '/flow-core-361.js?v=600', '/auth-otp-guard.js?v=600', '/optional-access-365.js?v=600', '/manifest.webmanifest?v=600'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -17,14 +17,14 @@ self.addEventListener('fetch', event => {
 
   if (url.pathname.startsWith('/api/') || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname === '/assets/17525.mp4' || url.pathname === '/magic-book-final-512.webp') {
     event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => {
-      if (event.request.mode === 'navigate') return caches.match('/index-360.html?v=460');
+      if (event.request.mode === 'navigate') return caches.match('/index-360.html?v=600');
       return caches.match(event.request);
     }));
     return;
   }
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match('/index-360.html?v=460')));
+    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match('/index-360.html?v=600')));
     return;
   }
 

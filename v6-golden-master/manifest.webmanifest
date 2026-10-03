@@ -1,10 +1,10 @@
 {
   "id": "/",
-  "name": "Magic Book Powersports V4.6",
+  "name": "Magic Book Powersports V6.0",
   "short_name": "Magic Book",
   "description": "Évaluateur d'échange intelligent pour véhicules de loisirs.",
   "lang": "fr-CA",
-  "start_url": "/?source=pwa&v=460",
+  "start_url": "/?source=pwa&v=600",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],

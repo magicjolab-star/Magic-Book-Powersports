@@ -200,5 +200,13 @@ document.addEventListener("DOMContentLoaded",function(){
   setTimeout(closeIntro,12500);
 });
 </script>
+<script>
+/* Enregistrement du service worker (requis pour l'installation PWA / invite "Installer l'app") */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+}
+</script>
 </body>
 </html>

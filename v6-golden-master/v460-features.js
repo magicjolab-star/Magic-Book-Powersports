@@ -321,29 +321,44 @@ try {
   applyLanguage = function () { baseApplyLanguage(); try { injectModeToggle(); refreshModeUI(); } catch (e) {} };
 } catch (e) { console.warn('v460 render bridge', e); }
 
-/* ---------- Bouton "Passer l'intro" (seulement si l'app est installée) ---------- */
+/* ---------- Bouton "Passer l'intro" (seulement si l'app est installée) ----------
+   L'intro v44 (v44-intro.js, chargée par premium-360.js) affiche une
+   "sound gate" qui exige un toucher. Le bouton Passer n'apparaît que si
+   l'app est installée (standalone) — à la première utilisation (navigateur),
+   l'intro reste obligatoire. */
 function v460isStandalone() {
   try { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
   catch (e) { return false; }
 }
 function initIntroSkip() {
-  var intro = document.getElementById('magic-studio-intro');
-  if (!intro || !v460isStandalone()) return; /* intro obligatoire à la première utilisation */
-  if (document.getElementById('introSkip')) return;
-  var btn = document.createElement('button');
-  btn.id = 'introSkip';
-  btn.type = 'button';
-  btn.className = 'intro-skip';
-  btn.textContent = L() === 'fr' ? '⏭ Passer l’intro' : '⏭ Skip intro';
-  btn.addEventListener('click', function () {
-    var v = document.getElementById('magic-studio-intro-video');
-    intro.classList.add('fade-out');
-    setTimeout(function () {
-      intro.style.display = 'none';
-      if (v) { try { v.pause(); } catch (e) {} }
-    }, 600);
-  });
-  intro.appendChild(btn);
+  if (!v460isStandalone()) return; /* intro obligatoire à la première utilisation */
+  var done = false;
+  function skipIntro() {
+    var ov = document.getElementById('v44-studio-intro');
+    var v = document.getElementById('v44-studio-video');
+    if (v) { try { v.pause(); } catch (e) {} }
+    if (ov) ov.remove();
+    try { document.documentElement.classList.add('v44-first-use-ready'); } catch (e) {}
+  }
+  function tryInject() {
+    if (done) return;
+    var gate = document.getElementById('v44-sound-gate');
+    if (!gate || document.getElementById('v460-intro-skip')) return;
+    var btn = document.createElement('button');
+    btn.id = 'v460-intro-skip';
+    btn.type = 'button';
+    btn.className = 'intro-skip';
+    btn.textContent = (typeof lang !== 'undefined' && lang === 'en') ? '⏭ Skip intro' : '⏭ Passer l’intro';
+    btn.addEventListener('click', function () { done = true; skipIntro(); });
+    gate.appendChild(btn);
+    done = true;
+  }
+  tryInject();
+  try {
+    var obs = new MutationObserver(function () { tryInject(); if (done) obs.disconnect(); });
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { try { obs.disconnect(); } catch (e) {} }, 30000);
+  } catch (e) {}
 }
 
 /* ---------- Init ---------- */

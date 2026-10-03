@@ -40,6 +40,21 @@
     #magic-studio-intro{position:fixed;inset:0;width:100vw;height:100dvh;z-index:2147483647;background:#000;display:flex;align-items:center;justify-content:center;opacity:1;overflow:hidden;transition:opacity 1.5s ease-in-out}
     #magic-studio-intro video{width:100%;height:100%;display:block;object-fit:contain;background:#000}
     #magic-studio-intro.fade-out{opacity:0;pointer-events:none}
+    /* --- Pack nouveautés 460 --- */
+    .mode-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+    .mode-card{position:relative;display:block;border:1px solid var(--mb-line);border-radius:14px;padding:12px;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018))}
+    .mode-card input{position:absolute;opacity:0;pointer-events:none}
+    .mode-card b{display:block;color:#eaf7ff;font-size:.92rem}
+    .mode-card small{color:#9aafbf;font-size:.75rem}
+    .mode-card.active{border-color:#d4af37;box-shadow:0 0 0 1px #d4af37}
+    .maint-range{font-size:1.4rem;font-weight:900;color:#d4af37;margin:6px 0}
+    .maint-list,.check-list{margin:8px 0;padding-left:22px;color:#cfe3ef;line-height:1.5}
+    .maint-list li,.check-list li{margin:5px 0}
+    .check-list{list-style:none;padding-left:4px}
+    .consign-form{display:grid;gap:10px;margin-top:12px}
+    .consign-form input{min-height:52px;border-radius:12px;border:1px solid var(--mb-line);background:#0a1a26;color:#eaf7ff;padding:0 14px;font-size:1rem;width:100%;box-sizing:border-box}
+    .consign-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .intro-skip{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:3;background:linear-gradient(180deg,#e8c85a,#c9a227);color:#1a1405;font-weight:900;font-size:1rem;border:0;border-radius:999px;padding:13px 26px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.5)}
   </style>
 </head>
 <body>
@@ -173,6 +188,7 @@
 <script src="/premium-360.js?v=600" defer></script>
 <script src="/flow-361.js?v=600" defer></script>
 <script src="/optional-access-365.js?v=600" defer></script>
+<script src="/v460-features.js?v=460" defer></script>
 <script>
 document.addEventListener("DOMContentLoaded",function(){
   const intro=document.getElementById("magic-studio-intro");

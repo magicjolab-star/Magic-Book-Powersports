@@ -174,11 +174,13 @@ jobs:
         shell: bash
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
 
-          if [ -z "${KEYSTORE_BASE64:-}" ] ||              [ -z "${KEYSTORE_PASSWORD:-}" ]; then
-            echo "::error::Missing signing secrets."
+          if [ -z "${KEYSTORE_BASE64:-}" ] || [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] || [ -z "${ANDROID_KEY_PASSWORD:-}" ]; then
+            echo "::error::Missing Android signing repository secrets."
             exit 1
           fi
 
@@ -189,10 +191,12 @@ jobs:
 
       - name: Verify upload certificate
         shell: bash
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           set -euo pipefail
 
-          FP="$(keytool -list -v             -keystore "$KEYSTORE_FILE"             -alias "$KEY_ALIAS"             -storepass "$KEYSTORE_PASSWORD" |
+          FP="$(keytool -list -v             -keystore "$KEYSTORE_FILE"             -alias "$KEY_ALIAS"             -storepass "$ANDROID_KEYSTORE_PASSWORD" |
             sed -n 's/.*SHA256: //p' |
             head -n 1)"
 
@@ -208,13 +212,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          cat >> android/gradle.properties <<EOF
-          MAGIC_KEYSTORE_FILE=$KEYSTORE_FILE
-          MAGIC_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD
-          MAGIC_KEY_ALIAS=$KEY_ALIAS
-          MAGIC_KEY_PASSWORD=$KEY_PASSWORD
-          EOF
-
           python3 - <<'PY'
           from pathlib import Path
 
@@ -227,10 +224,10 @@ jobs:
                   """android {
               signingConfigs {
                   release {
-                      storeFile file(MAGIC_KEYSTORE_FILE)
-                      storePassword MAGIC_KEYSTORE_PASSWORD
-                      keyAlias MAGIC_KEY_ALIAS
-                      keyPassword MAGIC_KEY_PASSWORD
+                      storeFile file(System.getenv("KEYSTORE_FILE"))
+                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("KEY_ALIAS")
+                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")
                   }
               }""",
                   1,

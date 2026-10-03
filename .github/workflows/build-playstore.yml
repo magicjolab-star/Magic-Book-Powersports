@@ -36,8 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || secrets.ANDROID_KEYSTORE_PASS || secrets.KEYSTORE_PASSWORD || secrets.MAGIC_KEYSTORE_PASSWORD || secrets.UPLOAD_KEYSTORE_PASSWORD }}
+      KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEY_PASS || secrets.KEY_PASSWORD || secrets.MAGIC_KEY_PASSWORD || secrets.UPLOAD_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD || secrets.ANDROID_KEYSTORE_PASS || secrets.KEYSTORE_PASSWORD || secrets.MAGIC_KEYSTORE_PASSWORD || secrets.UPLOAD_KEYSTORE_PASSWORD }}
 
     steps:
       - name: Checkout V6 Golden Master

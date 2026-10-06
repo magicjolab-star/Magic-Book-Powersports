@@ -57,14 +57,21 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf .v6-vercel
-          mkdir -p .v6-vercel
+          mkdir -p .v6-vercel/assets
           cp -a "$V6_SOURCE_DIR"/. .v6-vercel/
           cp "$V6_SOURCE_DIR/index-360.html" .v6-vercel/index.html
-          for asset in footer-logo.png app-icon.png favicon.png splash-video.mp4; do
+          for asset in footer-logo.png app-icon.png favicon.png; do
             if [ -f "$asset" ] && [ ! -f ".v6-vercel/$asset" ]; then
               cp "$asset" ".v6-vercel/$asset"
             fi
           done
+
+          if [ -f splash-video.mp4 ]; then
+            [ -f .v6-vercel/splash-video.mp4 ] || cp splash-video.mp4 .v6-vercel/splash-video.mp4
+            [ -f .v6-vercel/18559_2.mp4 ] || cp splash-video.mp4 .v6-vercel/18559_2.mp4
+            [ -f .v6-vercel/assets/17525.mp4 ] || cp splash-video.mp4 .v6-vercel/assets/17525.mp4
+            [ -f .v6-vercel/v44-intro.mp4 ] || cp splash-video.mp4 .v6-vercel/v44-intro.mp4
+          fi
 
       - name: Validate Vercel token
         shell: bash

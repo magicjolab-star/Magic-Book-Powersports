@@ -121,7 +121,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
-          curl --fail-with-body --silent --show-error             --request PATCH             "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_TEAM_ID"             -H "Authorization: Bearer $VERCEL_TOKEN"             -H "Content-Type: application/json"             --data '{"ssoProtection":null,"framework":null}'             >/tmp/project-updated.json
+          curl --fail-with-body --silent --show-error             --request PATCH             "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID?teamId=$VERCEL_TEAM_ID"             -H "Authorization: Bearer $VERCEL_TOKEN"             -H "Content-Type: application/json"             --data '{"ssoProtection":null,"framework":null,"buildCommand":"echo static","outputDirectory":".","installCommand":null}'             >/tmp/project-updated.json
           test "$(jq -r '.ssoProtection' /tmp/project-updated.json)" = "null"
 
       - name: Install pinned Vercel CLI

@@ -241,14 +241,14 @@ function wireConsign(p, data) {
     var original = sendBtn.textContent;
     sendBtn.textContent = tx('consignSending');
     showMsg('', false); msgEl.style.display = 'none';
-    fetch('/api/leads', {
+    fetch('/api/v6-lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         source: 'consignation',
         clientName: nm,
         clientPhone: ph,
-        category: p.type || p.categorie || '',
+        category: v460type(p.marque, p.modele),
         brand: p.marque || '',
         model: p.modele || '',
         year: p.annee || '',

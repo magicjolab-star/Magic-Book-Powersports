@@ -1,0 +1,151 @@
+name: Golden Master V6 QA
+
+on:
+  push:
+    branches:
+      - v6-golden-master
+    paths:
+      - 'v6-golden-master/**'
+      - 'package.json'
+      - 'capacitor.config.ts'
+      - '.github/workflows/golden-master-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: magic-book-v6-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    name: Validate Golden Master V6
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Golden Master
+        uses: actions/checkout@v4
+
+      - name: Validate branch and release identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "v6-golden-master"
+          grep -q '"version": "6.0.0"' package.json
+          grep -q "com.magicproduction.magicbook" capacitor.config.ts
+          grep -q 'content="6.0.0"' v6-golden-master/index-360.html
+          grep -q '<title>Magic Book Powersports V6.0</title>' v6-golden-master/index-360.html
+          grep -q 'Version V6.0' v6-golden-master/index-360.html
+          grep -q '"name": "Magic Book Powersports V6.0"' v6-golden-master/manifest.webmanifest
+          grep -q '"start_url": "/?source=pwa&v=600"' v6-golden-master/manifest.webmanifest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          find v6-golden-master -type f -name '*.js' -print0 | while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+
+      - name: Validate manifest and static assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path("v6-golden-master")
+          index = (root / "index-360.html").read_text(encoding="utf-8")
+          manifest = json.loads((root / "manifest.webmanifest").read_text(encoding="utf-8"))
+
+          assert manifest["name"] == "Magic Book Powersports V6.0"
+          assert manifest["start_url"] == "/?source=pwa&v=600"
+          assert manifest["scope"] == "/"
+          assert manifest["display"] == "standalone"
+
+          required = [
+              "index-360.html",
+              "manifest.webmanifest",
+              "sw.js",
+              "premium-360.js",
+              "flow-core-361.js",
+              "flow-361.js",
+              "auth-352.js",
+              "magic-book-final-192.webp",
+              "magic-book-final-512.webp",
+          ]
+          for rel in required:
+              p = root / rel
+              assert p.is_file() and p.stat().st_size > 0, f"Missing or empty: {rel}"
+
+          for icon in manifest.get("icons", []):
+              src = icon["src"].split("?", 1)[0].lstrip("/")
+              p = root / src
+              assert p.is_file() and p.stat().st_size > 0, f"Missing manifest icon: {src}"
+
+          refs = re.findall(r'(?:src|href)="([^"]+)"', index)
+          for ref in refs:
+              if ref.startswith(("http://", "https://", "data:", "#", "/api/")):
+                  continue
+              rel = ref.split("?", 1)[0].lstrip("/")
+              if not rel:
+                  continue
+              if Path(rel).suffix.lower() not in {".js",".css",".webmanifest",".png",".webp",".mp4",".html"}:
+                  continue
+              p = root / rel
+              assert p.is_file(), f"Broken local asset reference: {ref}"
+
+          assert "v=600" in index
+          assert "V4.6" not in index
+          assert "4.6.0" not in index
+          print("Static asset validation: PASS")
+          PY
+
+      - name: Validate service worker cache version
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'v=600' v6-golden-master/sw.js
+          if grep -q 'v=460' v6-golden-master/sw.js; then
+            echo "::error::Legacy cache version v=460 remains in service worker."
+            exit 1
+          fi
+
+      - name: Local HTTP smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd v6-golden-master
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/magic-book-v6-http.log 2>&1 &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:4173/index-360.html | grep -q 'Magic Book Powersports V6.0'
+          curl --fail --silent --show-error http://127.0.0.1:4173/manifest.webmanifest | grep -q 'Magic Book Powersports V6.0'
+          curl --fail --silent --show-error http://127.0.0.1:4173/sw.js | grep -q 'v=600'
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/magic-book-final-192.webp
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/magic-book-final-512.webp
+
+      - name: QA summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Magic Book Powersports V6 Golden Master QA'
+            echo
+            echo "- Branch: $GITHUB_REF_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo '- Version: 6.0.0'
+            echo '- Application ID: com.magicproduction.magicbook'
+            echo '- PWA cache version: 600'
+          } >> "$GITHUB_STEP_SUMMARY"

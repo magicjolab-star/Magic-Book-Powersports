@@ -3,7 +3,7 @@ name: Build Magic Book V6.0 Play Store
 on:
   push:
     branches:
-      - v6-golden-master-v460
+      - v6-golden-master
     paths:
       - 'v6-golden-master/**'
       - 'src/billing/**'
@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF_NAME" = "v6-golden-master-v460"
+          test "$GITHUB_REF_NAME" = "v6-golden-master"
           grep -q '"version": "6.0.0"' package.json
           grep -q "com.magicproduction.magicbook" capacitor.config.ts
           if grep -R --line-number --fixed-strings 'com.magicjolab.magicbook'             --exclude-dir=.git             --exclude-dir=.github             --exclude-dir=node_modules             --exclude-dir=dist             --exclude-dir=release             .; then

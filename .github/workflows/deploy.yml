@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF_NAME" = "v6-golden-master-v460"
+          test "$GITHUB_REF_NAME" = "v6-golden-master"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

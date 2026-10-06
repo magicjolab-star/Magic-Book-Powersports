@@ -159,6 +159,70 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/magic-book-final-512.webp
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/assets/17525.mp4
 
+      - name: Install project dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android API 36
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+
+      - name: Assemble Capacitor webDist
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          mkdir -p dist/assets
+          cp -a v6-golden-master/. dist/
+          cp v6-golden-master/index-360.html dist/index.html
+          for asset in footer-logo.png app-icon.png favicon.png; do
+            if [ -f "$asset" ] && [ ! -f "dist/$asset" ]; then
+              cp "$asset" "dist/$asset"
+            fi
+          done
+          if [ -f splash-video.mp4 ]; then
+            [ -f dist/splash-video.mp4 ] || cp splash-video.mp4 dist/splash-video.mp4
+            [ -f dist/18559_2.mp4 ] || cp splash-video.mp4 dist/18559_2.mp4
+            [ -f dist/assets/17525.mp4 ] || cp splash-video.mp4 dist/assets/17525.mp4
+            [ -f dist/v44-intro.mp4 ] || cp splash-video.mp4 dist/v44-intro.mp4
+          fi
+
+      - name: Create and sync Android project
+        shell: bash
+        env:
+          APP_ANDROID_PACKAGE: com.magicproduction.magicbook
+        run: |
+          set -euo pipefail
+          rm -rf android
+          npx cap add android
+          npx cap sync android
+          sed -i -E 's/compileSdkVersion = [0-9]+/compileSdkVersion = 36/' android/variables.gradle
+          sed -i -E 's/targetSdkVersion = [0-9]+/targetSdkVersion = 36/' android/variables.gradle
+          sed -i -E 's/applicationId "[^"]+"/applicationId "com.magicproduction.magicbook"/' android/app/build.gradle
+          sed -i -E 's/namespace = "[^"]+"/namespace = "com.magicproduction.magicbook"/' android/app/build.gradle
+          sed -i -E 's/namespace "[^"]+"/namespace "com.magicproduction.magicbook"/' android/app/build.gradle
+
+      - name: Compile Android debug
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon assembleDebug --stacktrace
+          test -s app/build/outputs/apk/debug/app-debug.apk
+
       - name: QA summary
         if: always()
         shell: bash

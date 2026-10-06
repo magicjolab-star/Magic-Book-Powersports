@@ -6,7 +6,6 @@
   "rewrites": [
     {"source": "/api/v6-lead", "destination": "/api/leads"},
     {"source": "/api/evaluate", "destination": "https://magic-book-powersports-44-magicjolab-7521s-projects.vercel.app/api/evaluate"},
-    {"source": "/api/auth", "destination": "https://magic-book-powersports-44-magicjolab-7521s-projects.vercel.app/api/auth"},
     {"source": "/api/vin", "destination": "https://magic-book-powersports-44-magicjolab-7521s-projects.vercel.app/api/vin"}
   ]
 }

@@ -23,23 +23,31 @@ function parseLead(body) {
     mileageHours: clean(body.mileageHours, 80),
     condition: clean(body.condition, 80),
     notes: clean(body.notes, 2000),
+    source: clean(body.source, 50),
+    vehicle: clean(body.vehicle, 220),
   };
 
-  if (!lead.clientName || !lead.clientPhone || !EMAIL_RE.test(lead.clientEmail)) return null;
+  const consignment = lead.source === 'consignation';
+  if (!lead.clientName || !lead.clientPhone) return null;
+  if (!consignment && !EMAIL_RE.test(lead.clientEmail)) return null;
+  if (lead.clientEmail && !EMAIL_RE.test(lead.clientEmail)) return null;
   if (!lead.category || !lead.brand || !lead.model || !lead.year) return null;
   return lead;
 }
 
 function buildText(lead) {
   return [
-    'Nouveau prospect reçu via Magic Book Powersports :',
+    lead.source === 'consignation' ? 'Nouvelle demande de consignation via Magic Book Powersports :' : 'Nouveau prospect reçu via Magic Book Powersports :',
+    '',
+    `SOURCE : ${lead.source || 'lead'}`,
     '',
     'INFORMATIONS CLIENT :',
     `- Nom : ${lead.clientName}`,
     `- Téléphone : ${lead.clientPhone}`,
-    `- Courriel : ${lead.clientEmail}`,
+    `- Courriel : ${lead.clientEmail || 'Non fourni'}`,
     '',
     'DÉTAILS DU VÉHICULE :',
+    `- Véhicule : ${lead.vehicle || [lead.year, lead.brand, lead.model].filter(Boolean).join(' ')}`,
     `- Catégorie : ${lead.category}`,
     `- Marque : ${lead.brand}`,
     `- Modèle : ${lead.model}`,
@@ -70,7 +78,9 @@ export default async function handler(req, res) {
   }
 
   const from = process.env.LEAD_FROM_EMAIL || 'Magic Book Powersports <noreply@magic-app.ca>';
-  const subject = `🔥 Nouveau Prospect Powersports - ${lead.brand} ${lead.model} (${lead.year})`;
+  const subject = lead.source === 'consignation'
+    ? `🤝 Consignation Magic Book - ${lead.brand} ${lead.model} (${lead.year})`
+    : `🔥 Nouveau Prospect Powersports - ${lead.brand} ${lead.model} (${lead.year})`;
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -83,7 +93,7 @@ export default async function handler(req, res) {
         from,
         to: SALES.to,
         cc: SALES.cc,
-        reply_to: lead.clientEmail,
+        ...(lead.clientEmail ? { reply_to: lead.clientEmail } : {}),
         subject,
         text: buildText(lead),
       }),

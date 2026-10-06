@@ -101,7 +101,7 @@ jobs:
           CODE="$(curl --silent --show-error             --output /tmp/project.json             --write-out "%{http_code}"             -H "Authorization: Bearer $VERCEL_TOKEN"             "$PROJECT_API")"
 
           if [ "$CODE" = "404" ]; then
-            CODE="$(curl --silent --show-error               --output /tmp/project.json               --write-out "%{http_code}"               --request POST               "https://api.vercel.com/v11/projects?teamId=$VERCEL_TEAM_ID"               -H "Authorization: Bearer $VERCEL_TOKEN"               -H "Content-Type: application/json"               --data "{"name":"$VERCEL_PROJECT_NAME","framework":null}")"
+            CODE="$(curl --silent --show-error               --output /tmp/project.json               --write-out "%{http_code}"               --request POST               "https://api.vercel.com/v11/projects?teamId=$VERCEL_TEAM_ID"               -H "Authorization: Bearer $VERCEL_TOKEN"               -H "Content-Type: application/json"               --data "$(jq -nc --arg name "$VERCEL_PROJECT_NAME" '{name:$name,framework:null}')"
           fi
 
           if [ "$CODE" != "200" ] && [ "$CODE" != "201" ]; then

@@ -2,6 +2,14 @@ name: Magic Book V6 Web Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - v6-golden-master
+    paths:
+      - 'v6-golden-master/**'
+      - 'package.json'
+      - 'capacitor.config.ts'
+      - '.github/workflows/deploy.yml'
 
 concurrency:
   group: magic-book-v6-web-${{ github.ref }}

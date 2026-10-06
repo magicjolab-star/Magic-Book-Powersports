@@ -9,6 +9,8 @@ on:
       - 'package.json'
       - 'capacitor.config.ts'
       - '.github/workflows/golden-master-qa.yml'
+      - '.github/workflows/build-playstore.yml'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:

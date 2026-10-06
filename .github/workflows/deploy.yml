@@ -55,7 +55,7 @@ jobs:
           test -f "$V6_SOURCE_DIR/flow-core-361.js"
           grep -q '6.0.0' package.json
           grep -q 'com.magicproduction.magicbook' capacitor.config.ts
-          if grep -R --line-number --fixed-strings 'com.magicjolab.magicbook'             --exclude-dir=.git             --exclude-dir=node_modules             --exclude-dir=dist             --exclude-dir=release             .; then
+          if grep -R --line-number --fixed-strings 'com.magicjolab.magicbook'             --exclude-dir=.git             --exclude-dir=.github             --exclude-dir=node_modules             --exclude-dir=dist             --exclude-dir=release             .; then
             echo "::error::Legacy Android application ID still exists."
             exit 1
           fi
@@ -170,8 +170,8 @@ jobs:
           {
             echo "## Magic Book V6 web deployment"
             echo
-            echo "- Branch: `$GITHUB_REF_NAME`"
-            echo "- Commit: `$GITHUB_SHA`"
-            echo "- Project: `$VERCEL_PROJECT_NAME`"
+            echo "- Branch: $GITHUB_REF_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Project: $VERCEL_PROJECT_NAME"
             echo "- URL: ${{ steps.deploy.outputs.url || 'deployment failed' }}"
           } >> "$GITHUB_STEP_SUMMARY"

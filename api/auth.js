@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 const FALLBACK_SUPABASE_URL = 'https://ehtvkqzqijjswqvxeyeu.supabase.co';
 const FALLBACK_SUPABASE_KEY = 'sb_publishable_KW_Hn-zQ51MvSnjLIDJpnw_Aw3ZvNU6';
@@ -132,7 +132,7 @@ async function syncProfile(accessToken, user, override = {}) {
   return Array.isArray(rows) ? rows[0] : rows;
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
     res.setHeader('Allow', 'GET, POST, OPTIONS');

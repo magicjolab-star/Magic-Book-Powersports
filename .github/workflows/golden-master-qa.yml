@@ -55,7 +55,29 @@ jobs:
             node --check "$file"
           done
 
-      - name: Validate manifest and static assets
+      - name: Assemble QA web package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .qa-dist
+          mkdir -p .qa-dist/assets
+          cp -a v6-golden-master/. .qa-dist/
+          cp v6-golden-master/index-360.html .qa-dist/index.html
+
+          for asset in footer-logo.png app-icon.png favicon.png; do
+            if [ -f "$asset" ] && [ ! -f ".qa-dist/$asset" ]; then
+              cp "$asset" ".qa-dist/$asset"
+            fi
+          done
+
+          if [ -f splash-video.mp4 ]; then
+            [ -f .qa-dist/splash-video.mp4 ] || cp splash-video.mp4 .qa-dist/splash-video.mp4
+            [ -f .qa-dist/18559_2.mp4 ] || cp splash-video.mp4 .qa-dist/18559_2.mp4
+            [ -f .qa-dist/assets/17525.mp4 ] || cp splash-video.mp4 .qa-dist/assets/17525.mp4
+            [ -f .qa-dist/v44-intro.mp4 ] || cp splash-video.mp4 .qa-dist/v44-intro.mp4
+          fi
+
+      - name: Validate manifest and packaged static assets
         shell: bash
         run: |
           set -euo pipefail
@@ -64,7 +86,7 @@ jobs:
           import re
           from pathlib import Path
 
-          root = Path("v6-golden-master")
+          root = Path(".qa-dist")
           index = (root / "index-360.html").read_text(encoding="utf-8")
           manifest = json.loads((root / "manifest.webmanifest").read_text(encoding="utf-8"))
 
@@ -115,8 +137,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'v=600' v6-golden-master/sw.js
-          if grep -q 'v=460' v6-golden-master/sw.js; then
+          grep -q 'v=600' .qa-dist/sw.js
+          if grep -q 'v=460' .qa-dist/sw.js; then
             echo "::error::Legacy cache version v=460 remains in service worker."
             exit 1
           fi
@@ -125,7 +147,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd v6-golden-master
+          cd .qa-dist
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/magic-book-v6-http.log 2>&1 &
           PID=$!
           trap 'kill $PID 2>/dev/null || true' EXIT
@@ -135,6 +157,7 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:4173/sw.js | grep -q 'v=600'
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/magic-book-final-192.webp
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/magic-book-final-512.webp
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4173/assets/17525.mp4
 
       - name: QA summary
         if: always()

@@ -241,7 +241,7 @@ function wireConsign(p, data) {
     var original = sendBtn.textContent;
     sendBtn.textContent = tx('consignSending');
     showMsg('', false); msgEl.style.display = 'none';
-    fetch('/api/v6-lead', {
+    fetch('/api/leads', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

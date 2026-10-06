@@ -12,7 +12,9 @@ function clean(value, max) {
 function parseLead(body) {
   if (!body || typeof body !== 'object') return null;
 
+  const source = body.source === 'consignation' ? 'consignation' : 'prospect';
   const lead = {
+    source,
     clientName: clean(body.clientName, 160),
     clientPhone: clean(body.clientPhone, 64),
     clientEmail: clean(body.clientEmail, 320).toLowerCase(),
@@ -23,31 +25,26 @@ function parseLead(body) {
     mileageHours: clean(body.mileageHours, 80),
     condition: clean(body.condition, 80),
     notes: clean(body.notes, 2000),
-    source: clean(body.source, 50),
-    vehicle: clean(body.vehicle, 220),
   };
 
-  const consignment = lead.source === 'consignation';
   if (!lead.clientName || !lead.clientPhone) return null;
-  if (!consignment && !EMAIL_RE.test(lead.clientEmail)) return null;
-  if (lead.clientEmail && !EMAIL_RE.test(lead.clientEmail)) return null;
+  if (source === 'prospect' && !EMAIL_RE.test(lead.clientEmail)) return null;
   if (!lead.category || !lead.brand || !lead.model || !lead.year) return null;
   return lead;
 }
 
 function buildText(lead) {
   return [
-    lead.source === 'consignation' ? 'Nouvelle demande de consignation via Magic Book Powersports :' : 'Nouveau prospect reçu via Magic Book Powersports :',
-    '',
-    `SOURCE : ${lead.source || 'lead'}`,
+    lead.source === 'consignation'
+      ? 'Nouvelle demande de CONSIGNATION via Magic Book Powersports :'
+      : 'Nouveau prospect reçu via Magic Book Powersports :',
     '',
     'INFORMATIONS CLIENT :',
     `- Nom : ${lead.clientName}`,
     `- Téléphone : ${lead.clientPhone}`,
-    `- Courriel : ${lead.clientEmail || 'Non fourni'}`,
+    `- Courriel : ${lead.clientEmail}`,
     '',
     'DÉTAILS DU VÉHICULE :',
-    `- Véhicule : ${lead.vehicle || [lead.year, lead.brand, lead.model].filter(Boolean).join(' ')}`,
     `- Catégorie : ${lead.category}`,
     `- Marque : ${lead.brand}`,
     `- Modèle : ${lead.model}`,
@@ -79,7 +76,7 @@ export default async function handler(req, res) {
 
   const from = process.env.LEAD_FROM_EMAIL || 'Magic Book Powersports <noreply@magic-app.ca>';
   const subject = lead.source === 'consignation'
-    ? `🤝 Consignation Magic Book - ${lead.brand} ${lead.model} (${lead.year})`
+    ? `🤝 Consignation - ${lead.brand} ${lead.model} (${lead.year}) - ${lead.clientName}`
     : `🔥 Nouveau Prospect Powersports - ${lead.brand} ${lead.model} (${lead.year})`;
 
   try {
@@ -93,7 +90,7 @@ export default async function handler(req, res) {
         from,
         to: SALES.to,
         cc: SALES.cc,
-        ...(lead.clientEmail ? { reply_to: lead.clientEmail } : {}),
+        ...(EMAIL_RE.test(lead.clientEmail) ? { reply_to: lead.clientEmail } : {}),
         subject,
         text: buildText(lead),
       }),

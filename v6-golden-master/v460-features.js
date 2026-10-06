@@ -327,7 +327,11 @@ try {
    l'app est installée (standalone) — à la première utilisation (navigateur),
    l'intro reste obligatoire. */
 function v460isStandalone() {
-  try { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+  try {
+    var cap = (window.Capacitor && window.Capacitor.getPlatform) ? window.Capacitor.getPlatform() : null;
+    if (cap === 'android' || cap === 'ios') return true;
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
   catch (e) { return false; }
 }
 function initIntroSkip() {

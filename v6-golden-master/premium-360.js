@@ -465,21 +465,7 @@
   }
 
   function loadV44(){
-    if(!document.querySelector('link[data-v44]')){
-      const link=document.createElement('link');
-      link.rel='stylesheet';
-      link.href='/style-v44.css?v=600';
-      link.dataset.v44='true';
-      document.head.appendChild(link);
-    }
-
-    if(!document.querySelector('script[data-v44]')){
-      const script=document.createElement('script');
-      script.src='/v44-ui.js?v=600';
-      script.defer=true;
-      script.dataset.v44='true';
-      document.head.appendChild(script);
-    }
+    // V6 Golden Master: legacy style-v44.css / v44-ui.js injection disabled.
   }
 
   function launchIntro(){

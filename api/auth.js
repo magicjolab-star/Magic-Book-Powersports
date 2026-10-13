@@ -31,6 +31,43 @@ function cleanOtp(value) {
   return /^\d{6}$/.test(token) ? token : '';
 }
 
+function normalizeAuthRedirect(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  let url;
+  try {
+    url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+  } catch {
+    return '';
+  }
+
+  const host = url.hostname.toLowerCase();
+  const trusted =
+    host === 'magic-app.ca' ||
+    host === 'www.magic-app.ca' ||
+    host.endsWith('-magicjolab-7521s-projects.vercel.app');
+
+  if (!trusted || url.protocol !== 'https:') return '';
+
+  url.username = '';
+  url.password = '';
+  url.pathname = '/';
+  url.search = '?auth=callback';
+  url.hash = '';
+  return url.toString();
+}
+
+function authRedirectUrl(req) {
+  return (
+    normalizeAuthRedirect(req.body?.redirect_to) ||
+    normalizeAuthRedirect(process.env.MAGIC_BOOK_AUTH_REDIRECT_URL) ||
+    normalizeAuthRedirect(process.env.VERCEL_BRANCH_URL) ||
+    normalizeAuthRedirect(process.env.VERCEL_URL) ||
+    ''
+  );
+}
+
 function emailHash(email) {
   return crypto.createHash('sha256').update(email).digest('hex');
 }
@@ -179,8 +216,13 @@ export default async function handler(req, res) {
       const marketingConsent = userType === 'particulier' && req.body?.marketing_consent === true;
       const locale = req.body?.locale === 'en' ? 'en' : 'fr';
 
+      const redirectTo = authRedirectUrl(req);
+      const otpPath = redirectTo
+        ? `/auth/v1/otp?redirect_to=${encodeURIComponent(redirectTo)}`
+        : '/auth/v1/otp';
+
       try {
-        await supabaseFetch('/auth/v1/otp', {
+        await supabaseFetch(otpPath, {
           method: 'POST',
           body: JSON.stringify({
             email,
@@ -209,7 +251,12 @@ export default async function handler(req, res) {
       }
 
       res.setHeader('X-MagicBook-OTP-Cooldown', String(OTP_COOLDOWN_SECONDS));
-      return json(res, 200, { ok: true, mode: 'email_otp_code', cooldown: OTP_COOLDOWN_SECONDS });
+      return json(res, 200, {
+        ok: true,
+        mode: 'email_otp_code',
+        cooldown: OTP_COOLDOWN_SECONDS,
+        redirect_to: redirectTo || null
+      });
     }
 
     if (action === 'verify-code') {

@@ -4,17 +4,33 @@
   "short_name": "Magic Book",
   "description": "Évaluateur d'échange intelligent pour véhicules de loisirs.",
   "lang": "fr-CA",
-  "start_url": "/?source=pwa&v=600",
+  "start_url": "/index-360.html?source=pwa&v=601",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "background_color": "#07141f",
   "theme_color": "#0b212d",
   "prefer_related_applications": false,
-  "categories": ["business", "utilities"],
+  "categories": [
+    "business",
+    "utilities"
+  ],
   "icons": [
-    {"src": "/magic-book-final-192.webp", "sizes": "192x192", "type": "image/webp", "purpose": "any"},
-    {"src": "/magic-book-final-512.webp", "sizes": "512x512", "type": "image/webp", "purpose": "any"}
+    {
+      "src": "/magic-book-icon-transparent.svg?v=601",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/magic-book-icon-transparent.svg?v=601",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ]
 }

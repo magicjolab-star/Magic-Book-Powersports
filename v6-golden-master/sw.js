@@ -1,5 +1,5 @@
-const CACHE_NAME = 'magic-book-powersports-v600';
-const APP_SHELL = ['/', '/index-360.html?v=600', '/style-330.css?v=600', '/style-352.css?v=600', '/style-360.css?v=600', '/accessory-350.css?v=600', '/data-330.js?v=600', '/app-330.js?v=600', '/accessory-350.js?v=600', '/auth-352.js?v=600', '/premium-360.js?v=600', '/flow-361.js?v=600', '/flow-core-361.js?v=600', '/auth-otp-guard.js?v=600', '/optional-access-365.js?v=600', '/manifest.webmanifest?v=600'];
+const CACHE_NAME = 'magic-book-powersports-v601';
+const APP_SHELL = ['/', '/index-360.html?v=601', '/style-330.css?v=601', '/style-352.css?v=601', '/style-360.css?v=601', '/accessory-350.css?v=601', '/data-330.js?v=601', '/app-330.js?v=601', '/accessory-350.js?v=601', '/auth-352.js?v=601', '/premium-360.js?v=601', '/flow-361.js?v=601', '/flow-core-361.js?v=601', '/auth-otp-guard.js?v=601', '/optional-access-365.js?v=601', '/manifest.webmanifest?v=601', '/magic-book-icon-transparent.svg?v=601'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -15,16 +15,16 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
 
-  if (url.pathname.startsWith('/api/') || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname === '/assets/17525.mp4' || url.pathname === '/magic-book-final-512.webp') {
+  if (url.pathname.startsWith('/api/') || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname === '/assets/17525.mp4' || url.pathname === '/magic-book-final-512.webp' || url.pathname === '/magic-book-icon-transparent.svg') {
     event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => {
-      if (event.request.mode === 'navigate') return caches.match('/index-360.html?v=600');
+      if (event.request.mode === 'navigate') return caches.match('/index-360.html?v=601');
       return caches.match(event.request);
     }));
     return;
   }
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match('/index-360.html?v=600')));
+    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match('/index-360.html?v=601')));
     return;
   }
 
